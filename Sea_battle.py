@@ -1,4 +1,5 @@
 from random import randint
+import time
 
 class BoardException(Exception):
     pass
@@ -131,6 +132,9 @@ class Board:
     def begin(self):
         self.busy_dots_on_board = []
 
+    def defeat(self):
+        return self.count_shooted_ships == len(self.ships_on_board)
+
 
 class Player:
     def __init__(self, board, enemy):
@@ -152,9 +156,12 @@ class Player:
 
 class AI(Player):
     def ask(self):
-        d = Dot(randint(0, 5), randint(0, 5))
-        print(f"Ход компьютера: {d.x + 1} {d.y + 1}")
-        return d
+        time.sleep(3)
+        while True:
+            d = Dot(randint(0, 5), randint(0, 5))
+            if d not in self.enemy.busy_dots_on_board:
+                print(f"Ход компьютера: {d.x + 1} {d.y + 1}")
+                return d
 
 
 class User(Player):
@@ -179,19 +186,19 @@ class User(Player):
 
 class Game:
     def __init__(self, size=6):
+        self.lens = [3, 2, 2, 1, 1, 1, 1]
         self.size = size
         player_board = self.random_board()
         comp_board = self.random_board()
-        comp_board.hid = True
+        comp_board.hid = False
 
         self.ai = AI(comp_board, player_board)
         self.us = User(player_board, comp_board)
 
     def try_board(self):
-        lens = [3, 2, 2, 1, 1, 1, 1]
         board = Board(size=self.size)
         attempts = 0
-        for l in lens:
+        for l in sorted(self.lens):
             while True:
                 attempts += 1
                 if attempts > 2000:
@@ -221,13 +228,13 @@ class Game:
         print(" y - номер столбца ")
 
     def print_boards(self):
-        print("-" * 20)
-        print("Доска пользователя:")
-        print(self.us.board)
-        print("-" * 20)
-        print("Доска компьютера:")
-        print(self.ai.board)
-        print("-" * 20)
+        print("-" * 57)
+        print("  Доска пользователя:", "Доска компьютера:", sep="          ")
+        a = self.us.board.__str__()
+        b = self.ai.board.__str__()
+        for i, j in zip(a.split("\n"), b.split("\n")):
+            print(i, j, sep="   ")
+        print("-" * 57)
 
     def loop(self):
         num = 0
@@ -242,13 +249,13 @@ class Game:
             if repeat:
                 num -= 1
 
-            if self.ai.board.count_shooted_ships == 7:
+            if self.ai.board.defeat():
                 self.print_boards()
                 print("-" * 20)
                 print("Пользователь выиграл!")
                 break
 
-            if self.us.board.count_shooted_ships == 7:
+            if self.us.board.defeat():
                 self.print_boards()
                 print("-" * 20)
                 print("Компьютер выиграл!")
