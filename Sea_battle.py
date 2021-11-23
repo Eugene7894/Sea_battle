@@ -190,7 +190,7 @@ class Game:
         self.size = size
         player_board = self.random_board()
         comp_board = self.random_board()
-        comp_board.hid = False
+        comp_board.hid = True
 
         self.ai = AI(comp_board, player_board)
         self.us = User(player_board, comp_board)
@@ -251,13 +251,11 @@ class Game:
 
             if self.ai.board.defeat():
                 self.print_boards()
-                print("-" * 20)
                 print("Пользователь выиграл!")
                 break
 
             if self.us.board.defeat():
                 self.print_boards()
-                print("-" * 20)
                 print("Компьютер выиграл!")
                 break
             num += 1
